@@ -6,23 +6,26 @@ module.exports = {
     entry: './src/plugin.js',
     output: {
         filename: 'ns-kiwi-plugin-avatar.js',
+        path: path.resolve(__dirname, 'dist'),
+        clean: true,
     },
     module: {
         rules: [
             {
                 test: /\.js$/,
-                use: [{loader: 'exports-loader'}, {loader: 'babel-loader'}],
+                use: [{loader: 'babel-loader'}],
                 include: [
                     path.join(__dirname, 'src'),
                 ]
             },
         ]
     },
-    devtool: isProd ? '' : 'source-map',
+    devtool: isProd ? false : 'source-map',
     devServer: {
-        filename: 'ns-kiwi-plugin-avatar.js',
-        contentBase: path.join(__dirname, "dist"),
+        static: {
+            directory: path.join(__dirname, 'dist'),
+        },
         compress: true,
-        port: 9000
+        port: 9000,
     }
 };
