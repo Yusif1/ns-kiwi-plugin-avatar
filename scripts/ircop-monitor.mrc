@@ -542,7 +542,7 @@ alias ircop.log.view {
   var %lines = $iif($1,$1,50)
   var %date = $iif($2,$2,$asctime(yyyy-mm-dd))
   var %dir = $iif($hget(ircop_config,log.dir),$v1,$+($scriptdir,logs))
-  var %file = $+(%dir,/,ircop-,%date,.log)
+  var %file = $qt($+(%dir,\,ircop-,%date,.log))
 
   if (!$isfile(%file)) {
     ircop.echo 4 [LOG] No log file found for %date
@@ -579,7 +579,7 @@ alias ircop.log.search {
   var %pattern = $1
   var %date = $iif($2,$2,$asctime(yyyy-mm-dd))
   var %dir = $iif($hget(ircop_config,log.dir),$v1,$+($scriptdir,logs))
-  var %file = $+(%dir,/,ircop-,%date,.log)
+  var %file = $qt($+(%dir,\,ircop-,%date,.log))
 
   if (!$isfile(%file)) {
     ircop.echo 4 [LOG] No log file found for %date
@@ -611,7 +611,7 @@ alias ircop.log.clear {
   ; Clear a specific day's log
   var %date = $iif($1,$1,$asctime(yyyy-mm-dd))
   var %dir = $iif($hget(ircop_config,log.dir),$v1,$+($scriptdir,logs))
-  var %file = $+(%dir,/,ircop-,%date,.log)
+  var %file = $qt($+(%dir,\,ircop-,%date,.log))
 
   if ($isfile(%file)) {
     .remove %file

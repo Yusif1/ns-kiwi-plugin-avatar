@@ -43,7 +43,7 @@ on *:UNLOAD:{
 ; CONFIGURATION SYSTEM
 ; ---------------------
 alias ircop.loadconfig {
-  var %f = $+($scriptdir,ircop.conf)
+  var %f = $qt($+($scriptdir,ircop.conf))
   if ($isfile(%f)) {
     hload ircop_config %f
   }
@@ -54,7 +54,7 @@ alias ircop.loadconfig {
 }
 
 alias ircop.saveconfig {
-  var %f = $+($scriptdir,ircop.conf)
+  var %f = $qt($+($scriptdir,ircop.conf))
   if ($hget(ircop_config)) { hsave ircop_config %f }
 }
 
@@ -383,9 +383,9 @@ alias ircop.log {
   if (!%dir) { %dir = $+($scriptdir,logs) }
 
   ; Ensure log directory exists
-  if (!$isdir(%dir)) { mkdir %dir }
+  if (!$isdir($qt(%dir))) { mkdir $qt(%dir) }
 
-  var %file = $+(%dir,/,ircop-,$asctime(yyyy-mm-dd),.log)
+  var %file = $qt($+(%dir,\,ircop-,$asctime(yyyy-mm-dd),.log))
   var %line = $+([,$asctime(HH:nn:ss),]) $+([,$1,]) $2-
   write %file %line
 }
