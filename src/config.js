@@ -5,7 +5,8 @@ export function setDefaults() {
 }
 
 function setSettingDefault(name, value) {
-    if (kiwi.state.getSetting('settings.' + name) === undefined) {
-        kiwi.state.setSetting('settings.' + name, value);
+    const settingKey = 'settings.' + name;
+    if (kiwi.state.getSetting(settingKey) === undefined) {
+        kiwi.state.setSetting(settingKey, value);
     }
 }

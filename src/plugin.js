@@ -7,14 +7,14 @@ kiwi.plugin('avatar', (kiwi) => {
     config.setDefaults();
 
     kiwi.on('irc.join', (event, net) => {
-        setTimeout(() => {
+        kiwi.Vue.nextTick(() => {
             updateAvatar(net, event.nick);
         });
     });
 
     kiwi.on('irc.wholist', (event, net) => {
-        let nicks = event.users.map((user) => user.nick);
-        setTimeout(() => {
+        const nicks = event.users.map((user) => user.nick);
+        kiwi.Vue.nextTick(() => {
             nicks.forEach((nick) => {
                 updateAvatar(net, nick, false);
             });
@@ -22,14 +22,14 @@ kiwi.plugin('avatar', (kiwi) => {
     });
 
     kiwi.on('irc.account', (event, net) => {
-        setTimeout(() => {
+        kiwi.Vue.nextTick(() => {
             updateAvatar(net, event.nick, true);
         });
     });
 
     function updateAvatar(net, nick, _force) {
-        let force = !!_force;
-        let user = kiwi.state.getUser(net.id, nick);
+        const force = !!_force;
+        const user = kiwi.state.getUser(net.id, nick);
         if (!user) {
             return;
         }
@@ -39,14 +39,14 @@ kiwi.plugin('avatar', (kiwi) => {
         }
 
         if (!user.account) { return; }
-        
-        let url = md5(user.account);
+
+        const url = md5(user.account);
 
         setAvatar(user, url);
     }
 
     function setAvatar(user, _url) {
-        let url = _url;
+        const url = _url;
 
         user.avatar.small = kiwi.state.setting('plugin-avatar.gatewayURL') + '40/' + url + '.png';
         user.avatar.large = kiwi.state.setting('plugin-avatar.gatewayURL') + 'default/' + url + '.png';
