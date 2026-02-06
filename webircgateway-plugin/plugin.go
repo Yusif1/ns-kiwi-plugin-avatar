@@ -7,10 +7,10 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"path"
 	"strings"
 	"sync"
@@ -212,7 +212,7 @@ func cacheCleanup() {
 }
 
 func loadConfig(configFile string) *Config {
-	raw, err := ioutil.ReadFile(configFile)
+	raw, err := os.ReadFile(configFile)
 	if err != nil {
 		logError(3, "Config read error: "+err.Error())
 		return nil
