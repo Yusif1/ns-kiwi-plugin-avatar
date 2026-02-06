@@ -541,7 +541,7 @@ alias ircop.log.view {
   ; View recent log entries in @IRCop window
   var %lines = $iif($1,$1,50)
   var %date = $iif($2,$2,$asctime(yyyy-mm-dd))
-  var %dir = $iif($hget(ircop_config,log.dir),$v1,$scriptdirlogs)
+  var %dir = $iif($hget(ircop_config,log.dir),$v1,$+($scriptdir,logs))
   var %file = $+(%dir,/,ircop-,%date,.log)
 
   if (!$isfile(%file)) {
@@ -578,7 +578,7 @@ alias ircop.log.search {
   }
   var %pattern = $1
   var %date = $iif($2,$2,$asctime(yyyy-mm-dd))
-  var %dir = $iif($hget(ircop_config,log.dir),$v1,$scriptdirlogs)
+  var %dir = $iif($hget(ircop_config,log.dir),$v1,$+($scriptdir,logs))
   var %file = $+(%dir,/,ircop-,%date,.log)
 
   if (!$isfile(%file)) {
@@ -610,7 +610,7 @@ alias ircop.log.clear {
   ; Usage: /ircop.log.clear [date]
   ; Clear a specific day's log
   var %date = $iif($1,$1,$asctime(yyyy-mm-dd))
-  var %dir = $iif($hget(ircop_config,log.dir),$v1,$scriptdirlogs)
+  var %dir = $iif($hget(ircop_config,log.dir),$v1,$+($scriptdir,logs))
   var %file = $+(%dir,/,ircop-,%date,.log)
 
   if ($isfile(%file)) {

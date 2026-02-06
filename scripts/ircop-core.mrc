@@ -43,7 +43,7 @@ on *:UNLOAD:{
 ; CONFIGURATION SYSTEM
 ; ---------------------
 alias ircop.loadconfig {
-  var %f = $scriptdirircop.conf
+  var %f = $+($scriptdir,ircop.conf)
   if ($isfile(%f)) {
     hload ircop_config %f
   }
@@ -54,7 +54,7 @@ alias ircop.loadconfig {
 }
 
 alias ircop.saveconfig {
-  var %f = $scriptdirircop.conf
+  var %f = $+($scriptdir,ircop.conf)
   if ($hget(ircop_config)) { hsave ircop_config %f }
 }
 
@@ -67,7 +67,7 @@ alias ircop.setdefaults {
 
   ; Logging
   hadd ircop_config log.enabled 1
-  hadd ircop_config log.dir $scriptdirlogs
+  hadd ircop_config log.dir $+($scriptdir,logs)
 
   ; Window settings
   hadd ircop_config window.auto 1
@@ -380,7 +380,7 @@ alias ircop.log {
   if ($hget(ircop_config,log.enabled) != 1) { return }
 
   var %dir = $hget(ircop_config,log.dir)
-  if (!%dir) { %dir = $scriptdirlogs }
+  if (!%dir) { %dir = $+($scriptdir,logs) }
 
   ; Ensure log directory exists
   if (!$isdir(%dir)) { mkdir %dir }
@@ -514,7 +514,7 @@ on *:DIALOG:ircop_setup:init:0:{
   did -a ircop_setup 24 $iif($hget(ircop_config,window.maxlines),$v1,5000)
 
   if ($hget(ircop_config,log.enabled) == 1) { did -c ircop_setup 31 }
-  did -a ircop_setup 33 $iif($hget(ircop_config,log.dir),$v1,$scriptdirlogs)
+  did -a ircop_setup 33 $iif($hget(ircop_config,log.dir),$v1,$+($scriptdir,logs))
 
   if ($hget(ircop_config,alert.flash) == 1) { did -c ircop_setup 41 }
   if ($hget(ircop_config,alert.sound) == 1) { did -c ircop_setup 42 }
