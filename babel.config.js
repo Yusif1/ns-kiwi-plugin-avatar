@@ -1,5 +1,7 @@
 module.exports = {
     presets: [
-        '@babel/env',
+        ['@babel/preset-env', {
+            targets: '> 1%, not dead',
+        }],
     ],
 };
