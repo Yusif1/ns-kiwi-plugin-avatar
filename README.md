@@ -17,7 +17,7 @@ Its been designed to work with Anope but will likely work with other services da
    $ yarn build
    ```
 
-   The plugin will then be created at `dist/plugin-gravatar.js`
+   The plugin will then be created at `dist/ns-kiwi-plugin-avatar.js`
 
 2. Copy the plugin to your Kiwi webserver
 
@@ -27,16 +27,16 @@ Its been designed to work with Anope but will likely work with other services da
 
    In your kiwi `config.json` file, find the `plugins` section and add:
    ```json
-   {"name": "gravatar", "url": "/plugins/plugin-gravatar.js"}
+   {"name": "avatar", "url": "/plugins/ns-kiwi-plugin-avatar.js"}
    ```
 
 #### Configuration
 
-```
-"plugin-gravatar": {
-    "gatewayURL", "//localhost:8001",
-    "gravatarURL", "https://www.gravatar.com/avatar/",
-    "gravatarRating", "g",
+```json
+"plugin-avatar": {
+    "gatewayURL": "//localhost:8001",
+    "gravatarURL": "https://www.gravatar.com/avatar/",
+    "gravatarRating": "g",
     "gravatarFallback": "robohash"
 }
 ```
