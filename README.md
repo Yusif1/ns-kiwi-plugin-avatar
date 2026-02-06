@@ -1,23 +1,23 @@
-# Gravatar Plugin for [Kiwi IRC] (https://kiwiirc.com)
+# Gravatar Plugin for [Kiwi IRC](https://kiwiirc.com)
 
-This plugin adds gravatars to kiwiirc using a webircgateway plugin to make server side sql queries
+This plugin adds gravatars to KiwiIRC using a webircgateway plugin to make server-side SQL queries.
 
-Its been designed to work with Anope but will likely work with other services databases too
+It has been designed to work with Anope but will likely work with other services databases too.
 
 #### Dependencies
-* node (https://nodejs.org/)
-* yarn (https://yarnpkg.com/)
+* [Node.js](https://nodejs.org/) (v18+)
+* [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
 
 #### Building and installing
 
 1. Build the plugin
 
    ```console
-   $ yarn
-   $ yarn build
+   $ npm install
+   $ npm run build
    ```
 
-   The plugin will then be created at `dist/plugin-gravatar.js`
+   The plugin will then be created at `dist/ns-kiwi-plugin-avatar.js`
 
 2. Copy the plugin to your Kiwi webserver
 
@@ -27,17 +27,14 @@ Its been designed to work with Anope but will likely work with other services da
 
    In your kiwi `config.json` file, find the `plugins` section and add:
    ```json
-   {"name": "gravatar", "url": "/plugins/plugin-gravatar.js"}
+   {"name": "avatar", "url": "/plugins/ns-kiwi-plugin-avatar.js"}
    ```
 
 #### Configuration
 
-```
-"plugin-gravatar": {
-    "gatewayURL", "//localhost:8001",
-    "gravatarURL", "https://www.gravatar.com/avatar/",
-    "gravatarRating", "g",
-    "gravatarFallback": "robohash"
+```json
+"plugin-avatar": {
+    "gatewayURL": "https://www.simosnap.org/uploads/avatars/"
 }
 ```
 
