@@ -7,10 +7,10 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"path"
 	"strings"
 	"sync"
@@ -153,9 +153,9 @@ func handleGravatar(w http.ResponseWriter, req *http.Request) {
 	gravURL.Path = path.Join(gravURL.Path, account.Gravatar)
 
 	w.Header().Set("Access-Control-Allow-Origin", originHeader)
-	w.Header().Set("Cache-Control", fmt.Sprintf("public, max-age:%.0f", config.cacheLifeDuration.Seconds()))
+	w.Header().Set("Cache-Control", fmt.Sprintf("public, max-age=%.0f", config.cacheLifeDuration.Seconds()))
 
-	http.Redirect(w, req, gravURL.String(), 302)
+	http.Redirect(w, req, gravURL.String(), http.StatusFound)
 
 	if cacheAccount {
 		cacheLock.Lock()
@@ -212,7 +212,7 @@ func cacheCleanup() {
 }
 
 func loadConfig(configFile string) *Config {
-	raw, err := ioutil.ReadFile(configFile)
+	raw, err := os.ReadFile(configFile)
 	if err != nil {
 		logError(3, "Config read error: "+err.Error())
 		return nil
