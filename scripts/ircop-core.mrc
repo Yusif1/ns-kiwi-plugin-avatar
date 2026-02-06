@@ -466,41 +466,42 @@ alias ircop.setup {
 
 dialog ircop_setup {
   title "IRCop System Configuration"
-  size -1 -1 340 380
+  size -1 -1 900 880
   option pixels
 
-  ; Oper Settings
-  text "Oper Name:", 1, 15 15 80 20
-  edit "", 10, 100 12 220 22
-  text "Oper Password:", 2, 15 42 80 20
-  edit "", 11, 100 39 220 22, pass
-  check "Auto Oper-Up on Connect", 12, 15 68 200 20
-  text "Oper Modes:", 3, 15 93 80 20
-  edit "", 13, 100 90 220 22
+  ; ── Oper Settings ──
+  box "Oper Settings", 50, 25 20 850 260
+  text "Oper Name:", 1, 50 65 180 32
+  edit "", 10, 240 60 600 36
+  text "Oper Password:", 2, 50 115 180 32
+  edit "", 11, 240 110 600 36, pass
+  text "Oper Modes:", 3, 50 165 180 32
+  edit "", 13, 240 160 600 36
+  check "Auto Oper-Up on Connect", 12, 50 218 380 32
 
-  ; Window Settings
-  box "Window Settings", 20, 10 120 320 75
-  check "Auto-open @IRCop Window", 21, 20 140 200 20
-  check "Show Timestamps", 22, 20 160 200 20
-  text "Max Lines:", 23, 20 183 70 18
-  edit "", 24, 95 180 60 22
+  ; ── Window Settings ──
+  box "Window Settings", 20, 25 295 850 180
+  check "Auto-open @IRCop Window on Connect", 21, 50 335 450 32
+  check "Show Timestamps in @IRCop Window", 22, 530 335 340 32
+  text "Max Lines in Window:", 23, 50 385 220 32
+  edit "", 24, 280 380 120 36
 
-  ; Logging
-  box "Logging", 30, 10 200 320 55
-  check "Enable Logging", 31, 20 218 150 20
-  text "Log Dir:", 32, 20 240 50 18
-  edit "", 33, 75 237 240 22
+  ; ── Logging ──
+  box "Logging", 30, 25 490 850 150
+  check "Enable Logging to File", 31, 50 530 380 32
+  text "Log Directory:", 32, 50 578 160 32
+  edit "", 33, 220 573 620 36
 
-  ; Alerts
-  box "Alerts", 40, 10 260 320 55
-  check "Flash on Alerts", 41, 20 278 130 20
-  check "Sound on Alerts", 42, 160 278 130 20
-  text "Clone Threshold:", 43, 20 300 95 18
-  edit "", 44, 120 297 40 22
+  ; ── Alerts ──
+  box "Alerts", 40, 25 655 850 130
+  check "Flash Taskbar on Alerts", 41, 50 695 340 32
+  check "Play Sound on Alerts", 42, 430 695 300 32
+  text "Clone Alert Threshold:", 43, 50 740 240 32
+  edit "", 44, 300 735 80 36
 
-  ; Buttons
-  button "Save", 100, 80 335 80 28, ok
-  button "Cancel", 101, 180 335 80 28, cancel
+  ; ── Buttons ──
+  button "Save", 100, 260 815 170 42, ok
+  button "Cancel", 101, 470 815 170 42, cancel
 }
 
 on *:DIALOG:ircop_setup:init:0:{

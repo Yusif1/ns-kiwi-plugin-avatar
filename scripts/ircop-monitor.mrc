@@ -803,45 +803,49 @@ alias ircop.monitor.dialog {
 
 dialog ircop_mondlg {
   title "IRCop Network Monitor"
-  size -1 -1 450 350
+  size -1 -1 900 700
   option pixels
 
-  ; Status panel
-  box "Network Status", 1, 10 10 430 100
-  text "Server:", 10, 20 30 50 18
-  text "", 11, 75 30 355 18
-  text "Oper Status:", 12, 20 50 75 18
-  text "", 13, 100 50 100 18
-  text "Local Users:", 14, 20 70 75 18
-  text "", 15, 100 70 100 18
-  text "Global Users:", 16, 220 70 85 18
-  text "", 17, 310 70 100 18
+  ; ── Network Status ──
+  box "Network Status", 1, 25 15 850 170
+  text "Server:", 10, 50 55 100 32
+  text "", 11, 160 55 680 32
+  text "Oper Status:", 12, 50 95 150 32
+  text "", 13, 210 95 250 32
+  text "Local Users:", 14, 50 135 150 32
+  text "", 15, 210 135 150 32
+  text "Global Users:", 16, 460 135 160 32
+  text "", 17, 630 135 200 32
 
-  ; Clone summary
-  box "Clone Detection", 2, 10 115 430 80
-  text "Tracked Hosts:", 20, 20 135 90 18
-  text "0", 21, 115 135 60 18
-  text "Tracked IPs:", 22, 200 135 80 18
-  text "0", 23, 285 135 60 18
-  text "Clone Alerts:", 24, 20 155 85 18
-  text "0", 25, 110 155 60 18
-  text "Threshold:", 26, 200 155 65 18
-  edit "3", 27, 270 152 40 22
-  button "Update", 28, 320 152 60 22
+  ; ── Clone Detection ──
+  box "Clone Detection", 2, 25 200 850 130
+  text "Tracked Hosts:", 20, 50 240 170 32
+  text "0", 21, 230 240 80 32
+  text "Tracked IPs:", 22, 370 240 150 32
+  text "0", 23, 530 240 80 32
+  text "Clone Alerts:", 24, 50 280 160 32
+  text "0", 25, 220 280 80 32
+  text "Threshold:", 26, 370 280 120 32
+  edit "3", 27, 500 275 80 36
+  button "Update", 28, 610 275 140 38
 
-  ; Actions
-  box "Quick Actions", 3, 10 200 430 100
-  button "Refresh Stats", 30, 20 220 100 28
-  button "Clone Report", 31, 130 220 100 28
-  button "View Log", 32, 240 220 100 28
-  button "Ban Stats", 33, 350 220 80 28
-  button "Network Map", 34, 20 256 100 28
-  button "Online Opers", 35, 130 256 100 28
-  button "Server Uptime", 36, 240 256 100 28
-  button "Dashboard", 37, 350 256 80 28
+  ; ── Quick Actions ──
+  box "Quick Actions", 3, 25 345 850 230
+  button "Refresh Stats", 30, 50 390 190 42
+  button "Clone Report", 31, 260 390 190 42
+  button "View Log", 32, 470 390 190 42
+  button "Ban Stats", 33, 680 390 170 42
+  button "Network Map", 34, 50 450 190 42
+  button "Online Opers", 35, 260 450 190 42
+  button "Server Uptime", 36, 470 450 190 42
+  button "Dashboard", 37, 680 450 170 42
+  button "Spamfilters", 38, 50 510 190 42
+  button "G-line List", 39, 260 510 190 42
+  button "Shun List", 45, 470 510 190 42
+  button "Z-line List", 46, 680 510 170 42
 
-  ; Close
-  button "Close", 100, 180 315 90 28, cancel
+  ; ── Close ──
+  button "Close", 100, 365 620 170 44, cancel
 }
 
 on *:DIALOG:ircop_mondlg:init:0:{
@@ -868,5 +872,9 @@ on *:DIALOG:ircop_mondlg:sclick:34:{ ircop.map }
 on *:DIALOG:ircop_mondlg:sclick:35:{ ircop.opers }
 on *:DIALOG:ircop_mondlg:sclick:36:{ ircop.uptime }
 on *:DIALOG:ircop_mondlg:sclick:37:{ ircop.dashboard }
+on *:DIALOG:ircop_mondlg:sclick:38:{ ircop.spamfilter list }
+on *:DIALOG:ircop_mondlg:sclick:39:{ ircop.gline.list }
+on *:DIALOG:ircop_mondlg:sclick:45:{ ircop.shun.list }
+on *:DIALOG:ircop_mondlg:sclick:46:{ ircop.zline.list }
 
 ; End of ircop-monitor.mrc

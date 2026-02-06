@@ -769,41 +769,42 @@ alias ircop.banmenu {
 
 dialog ircop_bandlg {
   title "IRCop Ban Manager"
-  size -1 -1 380 320
+  size -1 -1 900 720
   option pixels
 
-  ; Target
-  text "Target Nick/Mask:", 1, 15 15 110 20
-  edit "", 10, 130 12 230 22
+  ; ── Target ──
+  box "Target", 60, 25 15 850 80
+  text "Nick or Mask:", 1, 50 50 170 32
+  edit "", 10, 230 45 610 36
 
-  ; Action Type
-  text "Action:", 2, 15 45 60 20
-  combo 11, 80 42 130 150, drop
-  text "Duration:", 3, 220 45 60 20
-  combo 14, 280 42 80 150, drop
+  ; ── Action & Duration ──
+  box "Action", 61, 25 110 850 80
+  text "Type:", 2, 50 145 80 32
+  combo 11, 140 140 280 200, drop
+  text "Duration:", 3, 460 145 120 32
+  combo 14, 590 140 250 200, drop
 
-  ; Reason
-  text "Reason:", 4, 15 75 60 20
-  edit "", 12, 80 72 280 22
+  ; ── Reason ──
+  box "Reason", 62, 25 205 850 140
+  text "Reason:", 4, 50 240 100 32
+  edit "", 12, 160 235 680 36
+  text "Quick Reasons:", 5, 50 290 160 32
+  combo 13, 220 285 620 250, drop
 
-  ; Quick reason templates
-  text "Quick Reasons:", 5, 15 105 90 20
-  combo 13, 110 102 250 200, drop
+  ; ── Options ──
+  box "Options", 20, 25 360 850 90
+  check "Also Kill user", 21, 50 395 250 32
+  check "Apply to all clones", 22, 340 395 260 32
+  check "Log to channel", 23, 640 395 200 32
 
-  ; Options
-  box "Options", 20, 10 135 360 60
-  check "Also Kill user", 21, 20 155 120 20
-  check "Apply to all clones", 22, 150 155 150 20
-  check "Log to channel", 23, 20 175 150 20
+  ; ── Command Preview ──
+  box "Command Preview", 63, 25 465 850 80
+  edit "", 15, 50 498 800 36, read
 
-  ; Result preview
-  text "Command Preview:", 6, 15 205 110 20
-  edit "", 15, 15 222 345 22, read
-
-  ; Buttons
-  button "Execute", 100, 60 265 90 30, ok
-  button "Cancel", 101, 170 265 90 30, cancel
-  button "Preview", 102, 280 265 80 30
+  ; ── Buttons ──
+  button "Execute", 100, 180 575 180 44, ok
+  button "Preview", 102, 390 575 180 44
+  button "Cancel", 101, 600 575 180 44, cancel
 }
 
 on *:DIALOG:ircop_bandlg:init:0:{
