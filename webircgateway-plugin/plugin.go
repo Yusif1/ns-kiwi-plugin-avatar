@@ -8,6 +8,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -38,6 +39,10 @@ type Config struct {
 	ListenAddress      string   `json:"listen_addr"`
 	AllowedOrigins     []string `json:"allow_origins"`
 	AllowedOriginsGlob []glob.Glob
+
+	// Reverse proxy support: only trust X-Forwarded-For / X-Real-IP from these CIDRs
+	TrustedProxies []string `json:"trusted_proxies"`
+	trustedNets    []*net.IPNet
 }
 
 // Default config
@@ -96,9 +101,12 @@ func startGravatar(httpRouter *http.ServeMux) {
 func handleGravatar(w http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
 
+	clientIP := getClientIP(req)
+
 	// Check for allowed Origin
 	originHeader := strings.ToLower(req.Header.Get("Origin"))
 	if !isOriginAllowed(originHeader) {
+		logError(2, "Forbidden origin %q from %s", originHeader, clientIP)
 		hookError(w, http.StatusForbidden)
 		return
 	}
@@ -244,7 +252,78 @@ func loadConfig(configFile string) *Config {
 		config.AllowedOriginsGlob = append(config.AllowedOriginsGlob, newAllowedOrigin)
 	}
 
+	config.trustedNets = []*net.IPNet{}
+	for _, cidr := range config.TrustedProxies {
+		if !strings.Contains(cidr, "/") {
+			// Bare IP, convert to single-host CIDR
+			if strings.Contains(cidr, ":") {
+				cidr += "/128"
+			} else {
+				cidr += "/32"
+			}
+		}
+		_, ipNet, err := net.ParseCIDR(cidr)
+		if err != nil {
+			logError(3, "Config trusted_proxies failed to parse CIDR %q: %s", cidr, err.Error())
+			continue
+		}
+		config.trustedNets = append(config.trustedNets, ipNet)
+	}
+	if len(config.trustedNets) > 0 {
+		logError(1, "Trusted proxies configured: %d networks", len(config.trustedNets))
+	}
+
 	return config
+}
+
+// getClientIP extracts the real client IP, checking X-Forwarded-For and
+// X-Real-IP headers when the request comes from a trusted proxy.
+func getClientIP(req *http.Request) string {
+	remoteIP, _, err := net.SplitHostPort(req.RemoteAddr)
+	if err != nil {
+		remoteIP = req.RemoteAddr
+	}
+
+	if !isTrustedProxy(remoteIP) {
+		return remoteIP
+	}
+
+	if xff := req.Header.Get("X-Forwarded-For"); xff != "" {
+		// X-Forwarded-For can be a comma-separated list; the left-most
+		// entry that is NOT a trusted proxy is the real client.
+		parts := strings.Split(xff, ",")
+		for i := len(parts) - 1; i >= 0; i-- {
+			ip := strings.TrimSpace(parts[i])
+			if ip == "" {
+				continue
+			}
+			if !isTrustedProxy(ip) {
+				return ip
+			}
+		}
+	}
+
+	if realIP := req.Header.Get("X-Real-IP"); realIP != "" {
+		return strings.TrimSpace(realIP)
+	}
+
+	return remoteIP
+}
+
+func isTrustedProxy(ip string) bool {
+	if len(config.trustedNets) == 0 {
+		return false
+	}
+	parsed := net.ParseIP(ip)
+	if parsed == nil {
+		return false
+	}
+	for _, cidr := range config.trustedNets {
+		if cidr.Contains(parsed) {
+			return true
+		}
+	}
+	return false
 }
 
 func isOriginAllowed(originHeader string) bool {

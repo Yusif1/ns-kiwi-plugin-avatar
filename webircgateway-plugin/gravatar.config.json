@@ -4,5 +4,6 @@
     "salt": "",
     "gravatar_url": "//www.gravatar.com/avatar",
     "cache_life": "6h",
-    "cache_interval": "15m"
+    "cache_interval": "15m",
+    "trusted_proxies": ["127.0.0.1", "::1"]
 }
