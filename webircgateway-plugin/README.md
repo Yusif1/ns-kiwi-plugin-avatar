@@ -27,23 +27,53 @@ You will also need to add some items to `gravatar.config.json`:
 "allow_origins": ["*"]
 ```
 
-## Reverse proxy setup (hiding server IP / resolving real user IP)
+## Hiding the server IP and showing users' real IPs
 
-When running behind a reverse proxy (nginx, Cloudflare, etc.), the server sees the **proxy's IP** instead of the real client IP. Configure `trusted_proxies` so the server extracts the real user IP from `X-Forwarded-For` / `X-Real-IP` headers:
+There are three pieces to this puzzle:
 
-```json
-"trusted_proxies": ["127.0.0.1", "::1", "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
-```
+| Layer | Problem | Solution |
+|---|---|---|
+| User -> Server | Users can see the real server IP | Put nginx/Cloudflare in front |
+| nginx -> webircgateway | Backend sees nginx IP, not user IP | `X-Forwarded-For` headers + `reverse_proxies` in gateway config |
+| webircgateway -> IRCd | IRCd sees gateway IP, not user IP | WEBIRC protocol |
 
-Accepts single IPs or CIDR notation. Only requests arriving from a trusted proxy will have their forwarded headers respected (prevents spoofing).
+### Step 1: nginx reverse proxy (hides the server IP)
 
-### Example nginx config
+Users connect to nginx only. Your real server IP is never exposed.
 
 ```nginx
 server {
     listen 443 ssl;
     server_name irc.example.com;
 
+    ssl_certificate     /etc/ssl/certs/irc.example.com.pem;
+    ssl_certificate_key /etc/ssl/private/irc.example.com.key;
+
+    # Prevent leaking server software info
+    server_tokens off;
+    proxy_hide_header X-Powered-By;
+
+    # WebSocket endpoint (webircgateway)
+    location /webirc/ {
+        proxy_pass http://127.0.0.1:7778;
+        proxy_http_version 1.1;
+
+        # Required for WebSocket upgrade
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+
+        # Pass the real user IP to the backend
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # WebSocket timeouts
+        proxy_read_timeout 1h;
+        proxy_send_timeout 1h;
+    }
+
+    # Gravatar endpoint (this plugin, standalone mode)
     location /gravatar/ {
         proxy_pass http://127.0.0.1:4646;
         proxy_http_version 1.1;
@@ -52,39 +82,104 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
     }
-
-    location /webirc/ {
-        proxy_pass http://127.0.0.1:7778;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
 }
 ```
 
-This setup:
-- **Hides the real server IP** from users (they only see the proxy/CDN IP)
-- **Passes the real user IP** to the backend via `X-Forwarded-For` / `X-Real-IP`
-- The backend resolves the real client IP from those headers when the request comes from a trusted proxy
+### Step 2: webircgateway reads the real user IP from headers
 
-### webircgateway WEBIRC support
+In your webircgateway `config.conf`, tell it to trust your reverse proxy so it reads `X-Forwarded-For` instead of using the proxy's IP:
 
-To make the IRC server show users' real IPs instead of the gateway's IP, configure WEBIRC in your webircgateway `config.conf`:
+```ini
+[server]
+; Bind to localhost only -- nginx handles public traffic
+listen = 127.0.0.1:7778
+
+[reverse_proxies]
+; Trust nginx on localhost to provide the real user IP
+; via X-Forwarded-For / X-Real-IP headers
+127.0.0.1 = true
+::1 = true
+
+[client]
+; The gateway now resolves the real user IP from the
+; X-Forwarded-For header set by nginx above
+```
+
+For the **gravatar standalone** server, configure `trusted_proxies` in `gravatar.config.json`:
+
+```json
+{
+    "listen_addr": "127.0.0.1:4646",
+    "trusted_proxies": ["127.0.0.1", "::1"]
+}
+```
+
+Accepts single IPs or CIDR notation (e.g. `10.0.0.0/8`). Only requests from trusted proxies will have their forwarded headers respected, preventing spoofing.
+
+### Step 3: WEBIRC (makes IRC server show the user's real IP)
+
+Without WEBIRC, every user appears to connect from the gateway's IP on IRC. WEBIRC tells the IRCd the real user IP before registration.
+
+**webircgateway `config.conf`:**
 
 ```ini
 [upstream]
-webirc = password_agreed_with_ircd
+; The hostname or IP of your IRC server
+hostname = 127.0.0.1
+port = 6667
+tls = false
+
+; WEBIRC password -- must match what's in your IRCd config
+webirc = your_secret_webirc_password
 ```
 
-And add a matching WEBIRC block to your IRC server config (e.g. for UnrealIRCd):
+**IRCd config (UnrealIRCd example):**
 
 ```
 webirc {
     mask 127.0.0.1;
-    password "password_agreed_with_ircd";
+    password "your_secret_webirc_password";
 };
 ```
+
+**IRCd config (InspIRCd example):**
+
+```xml
+<connect name="webirc"
+         allow="127.0.0.1"
+         webirc="your_secret_webirc_password">
+```
+
+**IRCd config (ircd-hybrid / Charybdis / Solanum):**
+
+```
+auth {
+    user = "cgiirc@127.0.0.1";
+    password = "your_secret_webirc_password";
+    spoof = "webirc.";
+    class = "users";
+};
+```
+
+### How it all flows
+
+```
+User (real IP: 203.0.113.50)
+  |
+  |  HTTPS / WSS
+  v
+nginx (public IP: 198.51.100.10)
+  |
+  |  proxy_set_header X-Forwarded-For: 203.0.113.50
+  v
+webircgateway (127.0.0.1:7778)
+  |  reads X-Forwarded-For because 127.0.0.1 is a trusted reverse_proxy
+  |
+  |  WEBIRC your_secret_webirc_password cgiirc 203.0.113.50 :203.0.113.50
+  v
+IRCd
+  |  sees user as connecting from 203.0.113.50, not 127.0.0.1
+```
+
+- Users only see `198.51.100.10` (nginx) -- the real server IP is hidden
+- The IRCd sees `203.0.113.50` (the user) -- not the gateway IP
